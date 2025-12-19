@@ -29,4 +29,43 @@ return {
     ft = { 'go', 'gomod' },
     build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
   },
+  {
+    'mfussenegger/nvim-dap',
+    dependencies = {
+      'rcarriga/nvim-dap-ui',
+      'nvim-neotest/nvim-nio',
+      'leoluz/nvim-dap-go',
+    },
+    config = function()
+      local dap = require 'dap'
+      local dapui = require 'dapui'
+
+      require('dapui').setup()
+      require('dap-go').setup()
+
+      -- automatically open/close ui
+      dap.listeners.after.event_initialized['dapui_config'] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated['dapui_config'] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited['dapui_config'] = function()
+        dapui.close()
+      end
+
+      -- keybindings
+      vim.keymap.set('n', '<f5>', dap.continue, { desc = 'debug: start/continue' })
+      vim.keymap.set('n', '<f10>', dap.step_over, { desc = 'debug: step over' })
+      vim.keymap.set('n', '<f11>', dap.step_into, { desc = 'debug: step into' })
+      vim.keymap.set('n', '<f12>', dap.step_out, { desc = 'debug: step out' })
+      vim.keymap.set('n', '<leader>b', dap.toggle_breakpoint, { desc = 'debug: toggle breakpoint' })
+      vim.keymap.set('n', '<leader>B', function()
+        dap.set_breakpoint(vim.fn.input 'breakpoint condition: ')
+      end, { desc = 'debug: set conditional breakpoint' })
+      vim.keymap.set('n', '<leader>dt', function()
+        require('dap-go').debug_test()
+      end, { desc = 'debug go: debug test' })
+    end,
+  },
 }
